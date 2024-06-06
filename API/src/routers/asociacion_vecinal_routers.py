@@ -1,5 +1,5 @@
 from typing import List
-from src.models.asociacion_vecinal_models import asociacion_vecinal,update_asociacion
+from src.schema.asociacion_vecinal_schema import asociacion_vecinal,update_asociacion
 from fastapi import APIRouter,Body,HTTPException
 
 asociacion_router=APIRouter()
