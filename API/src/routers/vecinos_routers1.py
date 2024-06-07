@@ -1,11 +1,12 @@
 from src.schema.vecinos_schema import VecinoDB,VecinoUpdate,loginVecino
 from fastapi import APIRouter, HTTPException, Response
 from src.config.db import engine
-from src.models.vecino_model import vecinos
+from src.models.BarrioSeguro_model import vecinos 
 from sqlalchemy.sql import select
 from werkzeug.security import generate_password_hash,check_password_hash
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_401_UNAUTHORIZED
 from typing import List
+
 vecinos1_router=APIRouter()
 
 #Crear un vecino
@@ -85,8 +86,3 @@ def login_vecino(vecino_login:loginVecino):
                     "status": HTTP_401_UNAUTHORIZED,
                     "Message": "Access denied"
                 }
-
-
-
-
-
