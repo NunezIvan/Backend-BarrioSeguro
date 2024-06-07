@@ -4,7 +4,6 @@ from fastapi import APIRouter,HTTPException,Response
 from src.config.db import engine
 from src.models.BarrioSeguro_model import security
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
-from datetime import date
 from sqlalchemy.sql import select
 
 seguridad1_router=APIRouter()

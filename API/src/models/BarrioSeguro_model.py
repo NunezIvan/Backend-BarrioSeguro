@@ -1,5 +1,5 @@
 from sqlalchemy import Table,Column,ForeignKey
-from sqlalchemy.sql.sqltypes import Integer,String,Date,Float
+from sqlalchemy.sql.sqltypes import Integer,String,Date,Float,Time,Boolean
 from src.config.db import engine,meta_data
 
 vecinos = Table("Vecinos",meta_data, 
@@ -56,6 +56,50 @@ security = Table("seguridad",meta_data,
                  Column("fecha_inicio",Date,nullable=False),
                  Column("fecha_fin",Date,nullable=False),
                  Column("id_asociacion",String(6),ForeignKey('asociacion_vecinal.id_asociacion'),nullable=False))
+
+
+
+pagos = Table("pago" , meta_data,
+              Column("id_pago",Integer,primary_key=True,autoincrement=True),
+              Column("vecino_dni",Integer,ForeignKey('Vecinos.dni'),nullable=False,autoincrement=False),
+              Column("fecha_pago",Date,nullable=False),
+              Column("hora_pago",Time,nullable=False),
+              Column("monto_pago",Float,nullable=False),
+              Column("metodo_pago",String(35),nullable=False),
+              Column("cancel_pago",Boolean,nullable=False))
+
+
+
+reuniones = Table("reunion", meta_data,
+                   Column("id_reunion",String(6),primary_key=True),
+                   Column("hora_reunion",Time,nullable=False),
+                   Column("fecha_reunion",Date,nullable=False),
+                   Column("asunto_reunion",String(50),nullable=False),
+                   Column("id_asociacion",String(6),ForeignKey('asociacion_vecinal.id_asociacion'),nullable=False),
+                   Column("reu_realizada",Boolean,nullable=False),
+                   Column("asist1",String(90),nullable=False),
+                   Column("asist1_dni",Integer,ForeignKey('Vecinos.dni'),nullable=False))
+
+
+
+encuestas = Table("encuesta",meta_data,
+                  Column("id_encuesta",Integer,primary_key=True,autoincrement=True),
+                  Column("titulo",String(100),nullable=False),
+                  Column("opc_win",String(50),nullable=True),
+                  Column("vot_total",Integer,nullable=False),
+                  Column("fecha_inicio",Date,nullable=False),
+                  Column("fecha_fin",Date,nullable=False),
+                  Column("hora_encuesta",Time,nullable=False),
+                  Column("id_asociacion",String(6),ForeignKey('asociacion_vecinal.id_asociacion'),nullable=False))
+
+
+
+
+acuerdos = Table("acuerdo", meta_data,
+                 Column("id_acuerdo",Integer,primary_key=True,autoincrement=True),
+                 Column("titulo",String(100),nullable=False),
+                 Column("descripcion",String(250),nullable=False),
+                 Column("id_reunion",String(6),ForeignKey('reunion.id_reunion'),nullable=False))
 
 
 
