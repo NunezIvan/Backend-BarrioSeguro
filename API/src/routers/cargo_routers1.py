@@ -14,14 +14,22 @@ cargo1_router = APIRouter()
 def create_cargo(cargos:cargo_asoc):
     with engine.connect() as conn:
 
+        result_dni=conn.execute(cargo.select().where(cargo.c.vecino_dni == cargos.vecino_dni)).fetchone()
+        if result_dni:
+            raise HTTPException(status_code=400,detail=f"El DNI {cargos.vecino_dni} ya tiene cargo")
+
         result_asoc=conn.execute(vecinos.select().where(vecinos.c.dni == cargos.vecino_dni, vecinos.c.id_asociacion == cargos.id_asociacion)).first()
         if not result_asoc:
             raise HTTPException(status_code=400,detail=f"El DNI {cargos.vecino_dni} no pertenece a la asociación {cargos.id_asociacion}")
 
-        if cargos.nombre_cargo.lower() in ['presidente','tesorero']:
-            result_cargo= conn.execute(cargo.select().where(cargo.c.nombre_cargo == cargos.nombre_cargo,cargos.fecha_fin >= date.today(),cargo.c.id_asociacion == cargos.id_asociacion)).fetchone()
-            if result_cargo:
-                raise HTTPException(status_code=400, detail=f"Ya existe un cargo activo de {cargos.nombre_cargo}")
+        if cargos.nombre_cargo.lower() in ['director','secretario','tesorero','vecino']:
+            if cargos.nombre_cargo.lower() in ['director','secretario']:
+                result_cargo= conn.execute(cargo.select().where(cargo.c.nombre_cargo == cargos.nombre_cargo,cargos.fecha_fin >= date.today(),cargo.c.id_asociacion == cargos.id_asociacion)).fetchone()
+                if result_cargo:
+                    raise HTTPException(status_code=400, detail=f"Ya existe un cargo activo de {cargos.nombre_cargo}")
+        else:
+            raise HTTPException(status_code=400, detail=f"No existe un cargo llamado {cargos.nombre_cargo}")
+
         new_cargo = cargos.model_dump()
         conn.execute(cargo.insert().values(new_cargo))
         conn.commit()
@@ -53,13 +61,16 @@ def actualizar_cargo(id_cargo:int, actcargo:cargo_update):
         current_cargo = conn.execute(cargo.select().where(cargo.c.id_cargo == id_cargo)).fetchone()
         if not current_cargo:
             raise HTTPException(status_code=404, detail="Cargo no encontrado con ese ID")
-
-        if actcargo.nombre_cargo.lower() in ['presidente','tesorero']:
-            if actcargo.nombre_cargo.lower() != current_cargo.nombre_cargo.lower():
-                result_cargo = conn.execute(cargo.select().where(cargo.c.nombre_cargo == actcargo.nombre_cargo,cargo.c.fecha_fin >= date.today(),cargo.c.id_asociacion == current_cargo.id_asociacion)).fetchone()
+        
+        if actcargo.nombre_cargo.lower() in ['director','secretario','tesorero','vecino']:
+            if actcargo.nombre_cargo.lower() in ['director','secretario']:
+                result_cargo= conn.execute(cargo.select().where(cargo.c.nombre_cargo == actcargo.nombre_cargo,cargo.c.fecha_fin >= date.today(),cargo.c.id_asociacion == current_cargo.id_asociacion)).fetchone()
                 if result_cargo:
                     raise HTTPException(status_code=400, detail=f"Ya existe un cargo activo de {actcargo.nombre_cargo} en la asociación {current_cargo.id_asociacion}")
-        
+        else:
+            raise HTTPException(status_code=400, detail=f"No existe un cargo llamado {actcargo.nombre_cargo}")
+
+    
         conn.execute(cargo.update().values(nombre_cargo=actcargo.nombre_cargo,fecha_fin=actcargo.fecha_fin,sueldo=actcargo.sueldo).where(cargo.c.id_cargo == id_cargo))
         conn.commit()
 
@@ -68,7 +79,7 @@ def actualizar_cargo(id_cargo:int, actcargo:cargo_update):
               
 #Eliminar un cargo
 @cargo1_router.delete('/cargo/{id_cargo}',tags=['Cargos'],status_code=HTTP_204_NO_CONTENT)
-def delete_gasto(id_cargo:int):
+def delete_cargo(id_cargo:int):
     with engine.connect() as conn:
         conn.execute(cargo.delete().where(cargo.c.id_cargo == id_cargo))
         conn.commit()
