@@ -1,16 +1,17 @@
 from typing import List
-from src.schema.gasto_schema import gasto_asoc,gasto_up
-from fastapi import APIRouter,HTTPException,Response
+from src.schema.gasto_schema import gasto_asoc, gasto_up
+from fastapi import APIRouter, HTTPException, Response, Depends
 from src.config.db import engine
 from src.models.BarrioSeguro_model import gastos
 from sqlalchemy.sql import select
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from src.config.utils import get_api_key 
 
-gasto1_router=APIRouter()
+gasto1_router = APIRouter()
 
-#Registrar un gasto
-@gasto1_router.post('/gasto',status_code=HTTP_201_CREATED,tags=['Gastos'])
-def registrar_gastos(gasto:gasto_asoc):
+# Registrar un gasto
+@gasto1_router.post('/gasto', status_code=HTTP_201_CREATED, tags=['Gastos'], dependencies=[Depends(get_api_key)])
+def registrar_gastos(gasto: gasto_asoc):
     with engine.connect() as conn:
         query = select(gastos).where(gastos.c.id_gasto == gasto.id_gasto)
         result = conn.execute(query).fetchone()
@@ -22,44 +23,44 @@ def registrar_gastos(gasto:gasto_asoc):
         conn.commit()
         return "Gasto correctamente añadido"
     
-#Mostrar la lista de gastos
-@gasto1_router.get('/gasto',tags=['Gastos'],response_model=List[gasto_asoc])
+# Mostrar la lista de gastos
+@gasto1_router.get('/gasto', tags=['Gastos'], response_model=List[gasto_asoc], dependencies=[Depends(get_api_key)])
 def mostrar_gastos():
     with engine.connect() as conn:
-        result=conn.execute(gastos.select()).fetchall()
+        result = conn.execute(gastos.select()).fetchall()
         return result
     
-#Mostrar la lista de gastos de una asociacion
-@gasto1_router.get('/gasto/{id_asociacion}',response_model=List[gasto_asoc],tags=['Gastos'])
-def mostrar_gastos_id_asoc(id_asoc:str):
+# Mostrar la lista de gastos de una asociación
+@gasto1_router.get('/gasto/{id_asociacion}', response_model=List[gasto_asoc], tags=['Gastos'], dependencies=[Depends(get_api_key)])
+def mostrar_gastos_id_asoc(id_asoc: str):
     with engine.connect() as conn:
         result = conn.execute(gastos.select().where(gastos.c.id_asociacion == id_asoc)).fetchall()
-        query=conn.execute(gastos.select().where(gastos.c.id_asociacion == id_asoc)).fetchone()
+        query = conn.execute(gastos.select().where(gastos.c.id_asociacion == id_asoc)).fetchone()
         if not query:
-            raise HTTPException(status_code=404, detail="Lista de gastos no encontrada con ese ID de la Asociacion")
+            raise HTTPException(status_code=404, detail="Lista de gastos no encontrada con ese ID de la Asociación")
         else:
             return result
         
-#Actualizar los datos de un gasto
-@gasto1_router.put('/gasto/{id_gasto}', tags=['Gastos'],response_model=gasto_up)
-def actualizar_gasto(id_gasto:int, actgast:gasto_up):
+# Actualizar los datos de un gasto
+@gasto1_router.put('/gasto/{id_gasto}', tags=['Gastos'], response_model=gasto_up, dependencies=[Depends(get_api_key)])
+def actualizar_gasto(id_gasto: int, actgast: gasto_up):
     with engine.connect() as conn:
         conn.execute(gastos.update().values(tit_gasto=actgast.tit_gasto, fecha_gasto=actgast.fecha_gasto).where(gastos.c.id_gasto == id_gasto))
         conn.commit()
         result = conn.execute(gastos.select().where(gastos.c.id_gasto == id_gasto)).first()
-        query=conn.execute(gastos.select().where(gastos.c.id_gasto == id_gasto)).fetchone()
+        query = conn.execute(gastos.select().where(gastos.c.id_gasto == id_gasto)).fetchone()
         if not query:
             raise HTTPException(status_code=404, detail="Gasto no encontrado con ese ID")
         else:
             return result
 
-#Eliminar un gasto del registro
-@gasto1_router.delete('/gasto/{id_gasto}',tags=['Gastos'],status_code=HTTP_204_NO_CONTENT)
-def delete_gasto(id_gasto:int):
+# Eliminar un gasto del registro
+@gasto1_router.delete('/gasto/{id_gasto}', tags=['Gastos'], status_code=HTTP_204_NO_CONTENT, dependencies=[Depends(get_api_key)])
+def delete_gasto(id_gasto: int):
     with engine.connect() as conn:
         conn.execute(gastos.delete().where(gastos.c.id_gasto == id_gasto))
         conn.commit()
-        query=conn.execute(gastos.select().where(gastos.c.id_gasto == id_gasto)).fetchone()
+        query = conn.execute(gastos.select().where(gastos.c.id_gasto == id_gasto)).fetchone()
         if query:
             raise HTTPException(status_code=404, detail="Gasto no encontrado con ese ID")
         else:

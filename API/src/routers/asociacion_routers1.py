@@ -1,15 +1,16 @@
 from typing import List
 from src.schema.asociacion_vecinal_schema import asociacion_vecinal,update_asociacion
-from fastapi import APIRouter,HTTPException,Response
+from fastapi import APIRouter,HTTPException,Response,Depends
 from src.config.db import engine
 from src.models.BarrioSeguro_model import asociaciones
 from sqlalchemy.sql import select
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from src.config.utils import get_api_key 
 
 asociacion1_router=APIRouter()
 
 #Crear una asociacion
-@asociacion1_router.post('/asociaciones', tags=['Asociaciones Vecinales'], status_code=HTTP_201_CREATED)
+@asociacion1_router.post('/asociaciones', tags=['Asociaciones Vecinales'], status_code=HTTP_201_CREATED, dependencies=[Depends(get_api_key)])
 def create_asociacion(asociacion:asociacion_vecinal):
     with engine.connect() as conn:
         query = select(asociaciones).where(asociaciones.c.id_asociacion == asociacion.id_asociacion)
@@ -22,16 +23,15 @@ def create_asociacion(asociacion:asociacion_vecinal):
         conn.commit()
         return "Asociacion creada con exito"
     
-
 #Mostrar la lista de asociaciones
-@asociacion1_router.get('/asociaciones', tags=['Asociaciones Vecinales'], response_model=List[asociacion_vecinal])
+@asociacion1_router.get('/asociaciones', tags=['Asociaciones Vecinales'], response_model=List[asociacion_vecinal], dependencies=[Depends(get_api_key)])
 def mostrar_asociaciones():
     with engine.connect() as conn:
         result=conn.execute(asociaciones.select()).fetchall()
         return result
 
 #Buscar asociacion mediante su ID
-@asociacion1_router.get('/asociaciones/{id_asociacion}',response_model=asociacion_vecinal,tags=['Asociaciones Vecinales'])
+@asociacion1_router.get('/asociaciones/{id_asociacion}',response_model=asociacion_vecinal,tags=['Asociaciones Vecinales'], dependencies=[Depends(get_api_key)])
 def mostrar_asociacion_id(id_asoc:str):
     with engine.connect() as conn:
         result = conn.execute(asociaciones.select().where(asociaciones.c.id_asociacion ==id_asoc)).first()
@@ -41,9 +41,8 @@ def mostrar_asociacion_id(id_asoc:str):
         else:
             return result
         
-
 #Actualizar los datos de una asociacion vecinal
-@asociacion1_router.put('/asociaciones/{id_asociacion}', tags=['Asociaciones Vecinales'],response_model=update_asociacion)
+@asociacion1_router.put('/asociaciones/{id_asociacion}', tags=['Asociaciones Vecinales'],response_model=update_asociacion, dependencies=[Depends(get_api_key)])
 def actualizar_asociacion(id_asoc:str, actasoc:update_asociacion):
     with engine.connect() as conn:
         conn.execute(asociaciones.update().values(nombre=actasoc.nombre, distrito=actasoc.distrito, provincia=actasoc.provincia).where(asociaciones.c.id_asociacion == id_asoc))
@@ -56,7 +55,7 @@ def actualizar_asociacion(id_asoc:str, actasoc:update_asociacion):
             return result
         
 #Eliminar una asociacion vecinal
-@asociacion1_router.delete('/asociaciones/{id_asociacion}',tags=['Asociaciones Vecinales'],status_code=HTTP_204_NO_CONTENT)
+@asociacion1_router.delete('/asociaciones/{id_asociacion}',tags=['Asociaciones Vecinales'],status_code=HTTP_204_NO_CONTENT, dependencies=[Depends(get_api_key)])
 def delete_asociaciones(id_asoc:str):
     with engine.connect() as conn:
         conn.execute(asociaciones.delete().where(asociaciones.c.id_asociacion == id_asoc))

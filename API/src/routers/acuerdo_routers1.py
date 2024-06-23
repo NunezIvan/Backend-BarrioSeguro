@@ -1,15 +1,16 @@
 from typing import List
 from src.schema.acuerdo_schema import acuerdo_reu,updt_acuerdo
-from fastapi import APIRouter,HTTPException,Response
+from fastapi import APIRouter,HTTPException,Response,Depends
 from src.config.db import engine
 from src.models.BarrioSeguro_model import acuerdos,reuniones
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from sqlalchemy.sql import select
+from src.config.utils import get_api_key 
 
 acuerdo1_router = APIRouter()
 
 #Crear un acuerdo
-@acuerdo1_router.post('/acuerdo',status_code=HTTP_201_CREATED,tags=['Acuerdo'])
+@acuerdo1_router.post('/acuerdo',status_code=HTTP_201_CREATED,tags=['Acuerdo'], dependencies=[Depends(get_api_key)])
 def create_acuerdo(acuerdo1:acuerdo_reu):
     with engine.connect() as conn:
         query = select(acuerdos).where(acuerdos.c.id_acuerdo == acuerdo1.id_acuerdo)
@@ -27,7 +28,7 @@ def create_acuerdo(acuerdo1:acuerdo_reu):
         return "Acuerdo correctamente añadido"
     
 #Mostrar lista de encuesta de una reunion
-@acuerdo1_router.get('/acuerdo/{id_reunion}',response_model=List[acuerdo_reu],tags=['Acuerdo'])
+@acuerdo1_router.get('/acuerdo/{id_reunion}',response_model=List[acuerdo_reu],tags=['Acuerdo'], dependencies=[Depends(get_api_key)])
 def mostrar_acuerdo_id_acuerdo(id_reunion:str):
     with engine.connect() as conn:
         result = conn.execute(acuerdos.select().where(acuerdos.c.id_reunion == id_reunion)).fetchall()
@@ -38,7 +39,7 @@ def mostrar_acuerdo_id_acuerdo(id_reunion:str):
             return result
         
 #Actualizar los datos de un acuerdo
-@acuerdo1_router.put('/acuerdo/{id_acuerdo}', tags=['Acuerdo'],response_model=updt_acuerdo)
+@acuerdo1_router.put('/acuerdo/{id_acuerdo}', tags=['Acuerdo'],response_model=updt_acuerdo, dependencies=[Depends(get_api_key)])
 def actualizar_acuerdo(id_acuerdo:int, actacuerdo:updt_acuerdo):
     with engine.connect() as conn:
         conn.execute(acuerdos.update().values(titulo=actacuerdo.titulo, descripcion=actacuerdo.descripcion).where(acuerdos.c.id_acuerdo == id_acuerdo))
@@ -51,7 +52,7 @@ def actualizar_acuerdo(id_acuerdo:int, actacuerdo:updt_acuerdo):
             return result
         
 #Eliminar un acuerdo
-@acuerdo1_router.delete('/acuerdo/{id_acuerdo}',tags=['Acuerdo'],status_code=HTTP_204_NO_CONTENT)
+@acuerdo1_router.delete('/acuerdo/{id_acuerdo}',tags=['Acuerdo'],status_code=HTTP_204_NO_CONTENT, dependencies=[Depends(get_api_key)])
 def delete_acuerdo(id_acuerdo:int):
     with engine.connect() as conn:
         conn.execute(acuerdos.delete().where(acuerdos.c.id_acuerdo == id_acuerdo))
