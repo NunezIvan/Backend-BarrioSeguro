@@ -1,0 +1,8 @@
+fastapi
+sqlalchemy
+jose
+werkzeug
+pydantic
+starlette
+cryptography
+typing
