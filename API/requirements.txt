@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 aiomysql==0.2.0
 annotated-types==0.7.0
-=======
->>>>>>> 3e975bf7d5f50f4ffdc0686cd76c3962634282f7
 anyio==4.4.0
 bcrypt==4.1.3
 certifi==2024.2.2

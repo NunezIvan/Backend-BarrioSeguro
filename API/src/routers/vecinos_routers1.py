@@ -1,11 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import jwt, JWTError
-from datetime import datetime, timedelta
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.sql import select
 from werkzeug.security import generate_password_hash, check_password_hash
 from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_401_UNAUTHORIZED
-from typing import List, Optional
+from typing import List
 from src.schema.vecinos_schema import VecinoDB, VecinoUpdate, loginVecino
 from src.config.db import engine
 from src.models.BarrioSeguro_model import vecinos
@@ -90,11 +87,10 @@ def delete_vecino(vecino_dni: int):
 # Login de vecinos (con protección de API Key)
 @vecinos1_router.post("/vecinos/login", tags=['Vecinos'], dependencies=[Depends(get_api_key)])
 def login_vecino(vecino_login: loginVecino):
-    with engine.connect() as conn:
-        user = authenticate_user(vecino_login.dni, vecino_login.contraseña)
-        if not user:
-            raise HTTPException(
-                status_code=HTTP_401_UNAUTHORIZED,
-                detail="DNI o Contraseña Incorrecta",
-            )
-        return {"message": "Acceso concedido"}
+    user = authenticate_user(vecino_login.dni, vecino_login.contraseña)
+    if not user:
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED,
+            detail="DNI o Contraseña Incorrecta",
+        )
+    return {"message": "Acceso concedido"}
