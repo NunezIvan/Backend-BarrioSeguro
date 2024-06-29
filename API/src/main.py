@@ -23,10 +23,10 @@ app.include_router(router=reunion1_router)
 app.include_router(router=encuesta1_router)
 app.include_router(router=acuerdo1_router)
 
-# Configurar CORS para permitir solicitudes desde tu frontend en producción
+# Configurar CORS para permitir todos los orígenes (cualquier dominio)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://tu-dominio-frontend.com", "https://tu-dominio-frontend.com"],
+    allow_origins=["*"],  # Permitir cualquier origen
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
