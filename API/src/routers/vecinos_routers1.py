@@ -12,12 +12,6 @@ from src.models.BarrioSeguro_model import vecinos
 from src.config.utils import get_api_key  
 
 vecinos1_router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="vecinos/login")
-
-# Configuración de JWT
-SECRET_KEY = "TuClaveSecretaSuperSecreta"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 def get_password_hash(password):
     return generate_password_hash(password, "pbkdf2:sha256:30", 30)
@@ -33,16 +27,6 @@ def authenticate_user(dni: int, password: str):
         if not verify_password(password, user.contraseña):
             return False
         return user
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
 
 # Crear un vecino
 @vecinos1_router.post('/vecinos', status_code=HTTP_201_CREATED, tags=['Vecinos'], dependencies=[Depends(get_api_key)])
@@ -104,17 +88,13 @@ def delete_vecino(vecino_dni: int):
             return Response(status_code=HTTP_204_NO_CONTENT)
 
 # Login de vecinos (con protección de API Key)
-@vecinos1_router.post("/vecinos/login", tags=['Vecinos'])
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="DNI o Contraseña Incorrecta",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": str('user.dni')}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
+@vecinos1_router.post("/vecinos/login", tags=['Vecinos'], dependencies=[Depends(get_api_key)])
+def login_vecino(vecino_login: loginVecino):
+    with engine.connect() as conn:
+        user = authenticate_user(vecino_login.dni, vecino_login.contraseña)
+        if not user:
+            raise HTTPException(
+                status_code=HTTP_401_UNAUTHORIZED,
+                detail="DNI o Contraseña Incorrecta",
+            )
+        return {"message": "Acceso concedido"}
