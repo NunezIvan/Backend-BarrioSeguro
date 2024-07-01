@@ -15,7 +15,7 @@ Primero, clona tu repositorio desde GitHub.
 git clone <https://github.com/NunezIvan/Backend-BarrioSeguro>
 ```
 
-### Paso 1: Crear y Activar un Entorno Virtual
+### Paso 2: Crear y Activar un Entorno Virtual
 #### En Windows:
 ```bash
 python -m venv env
