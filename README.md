@@ -92,8 +92,8 @@ FastAPI proporciona automáticamente documentación interactiva de la API. Puede
 │   │   ├── vecinos_schema.py
 ```
 
+## Diagrama de la Base de Datos
 
-
-
+![Diagrama de la Base de Datos](DB_BarrioSeguro_Image.png)
 
 
