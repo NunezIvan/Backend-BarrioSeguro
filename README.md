@@ -12,4 +12,4 @@ Este proyecto es una API para la gestión de una aplicación de Barrio Seguro, d
 Primero, clona tu repositorio desde GitHub.
 ```bash
 git clone <https://github.com/NunezIvan/Backend-BarrioSeguro>
-cd <https://github.com/NunezIvan/Backend-BarrioSeguro>
+
