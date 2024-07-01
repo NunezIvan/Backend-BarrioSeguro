@@ -69,6 +69,7 @@ FastAPI proporciona automáticamente documentación interactiva de la API. Puede
 . Swagger UI: http://127.0.0.1:8000/docs
 . Redoc: http://127.0.0.1:8000/redoc
 
+Documentacion de la API: [Documentacion_API](https://n9.cl/barrio-seguro).
 
 
 ## Estructura del proyecto
