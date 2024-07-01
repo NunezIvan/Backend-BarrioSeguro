@@ -66,7 +66,9 @@ uvicorn src.main:app --reload
 
 ### Paso 8: Acceder a la Documentación de la API
 FastAPI proporciona automáticamente documentación interactiva de la API. Puedes acceder a ella navegando a las siguientes URLs en tu navegador web:
+
 . Swagger UI: http://127.0.0.1:8000/docs
+
 . Redoc: http://127.0.0.1:8000/redoc
 
 Documentacion de la API: [Documentacion_API](https://n9.cl/barrio-seguro).
